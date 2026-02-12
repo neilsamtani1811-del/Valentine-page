@@ -1,0 +1,177 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Proposal</title>
+    <style>
+        body {
+            background-color: pink;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden; /* Prevent scrollbars from hearts */
+        }
+        h1 {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 5em;
+            color: red;
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 10; /* Above hearts */
+            position: absolute;
+            top: 20px; /* Position towards the top */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .buttons {
+            position: relative;
+            width: 100%;
+            height: 200px; /* Give space for buttons to move */
+            z-index: 10; /* Above hearts */
+            margin-top: 100px; /* Push down from h1 */
+        }
+        button {
+            padding: 15px 30px; /* Bigger padding */
+            font-size: 2em; /* Bigger font */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+        }
+        #yes {
+            background-color: green;
+            color: white;
+            transition: transform 0.3s ease;
+            left: 40%; /* Initial position */
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #no {
+            background-color: red;
+            color: white;
+            left: 60%; /* Initial position */
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease;
+        }
+        .heart {
+            position: absolute;
+            font-size: 2em;
+            color: red;
+            animation: fall linear infinite;
+            pointer-events: none; /* Don't interfere with clicks */
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Will you be my Valentine?</h1>
+    <div class="buttons">
+        <button id="yes">Yes</button>
+        <button id="no">No</button>
+    </div>
+
+    <script>
+        let yesSize = 1; // Initial scale for Yes
+        let noSize = 1; // Initial scale for No
+        let noClickCount = 0;
+        const yesButton = document.getElementById('yes');
+        const noButton = document.getElementById('no');
+        const buttonsContainer = document.querySelector('.buttons');
+
+        // Function to create falling hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw'; // Random horizontal position
+            heart.style.animationDuration = (Math.random() * 3 + 2) + 's'; // Random fall speed
+            document.body.appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+
+        // Create hearts every 300ms
+        setInterval(createHeart, 300);
+
+        function moveNoButton() {
+            const containerRect = buttonsContainer.getBoundingClientRect();
+            const buttonWidth = noButton.offsetWidth * noSize; // Account for scaled size
+            const buttonHeight = noButton.offsetHeight * noSize;
+            
+            const maxX = containerRect.width - buttonWidth;
+            const maxY = containerRect.height - buttonHeight;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            noButton.style.left = `${randomX}px`;
+            noButton.style.top = `${randomY}px`;
+            noButton.style.transform = `scale(${noSize}) translate(0, 0)`; // Reset transform for absolute positioning
+        }
+
+        noButton.addEventListener('click', () => {
+            noClickCount++;
+            yesSize += 0.2; // Increase Yes size by 20% each click
+            yesButton.style.transform = `scale(${yesSize}) translate(-50%, -50%)`; // Keep centering
+            
+            noSize -= 0.1; // Decrease No size by 10% each click
+            if (noSize < 0.1) noSize = 0.1; // Prevent it from disappearing completely
+            noButton.style.transform = `scale(${noSize}) translate(-50%, -50%)`; // Apply scale
+            
+            if (noClickCount >= 4) {
+                // After 4 clicks, add mouseenter event to make it dodge
+                noButton.addEventListener('mouseenter', moveNoButton);
+            }
+        });
+
+        yesButton.addEventListener('click', () => {
+            // Open a new page with the message
+            let newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Accepted!</title>
+                    <style>
+                        body {
+                            background-color: pink;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            font-family: 'Brush Script MT', cursive;
+                            font-size: 4em;
+                            color: red;
+                            text-align: center;
+                        }
+                    </style>
+                </head>
+                <body>
+                    I knew you would accept ❤️❤️❤️
+                </body>
+                </html>
+            `);
+        });
+    </script>
+</body>
+</html>
